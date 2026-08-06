@@ -4,6 +4,7 @@ namespace Arquivei\Events\Sender\Exporters;
 
 use Arquivei\Events\Sender\Schemas\BaseSchema;
 use Monolog\Logger;
+use Monolog\LogRecord;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\JsonFormatter;
 use Arquivei\Events\Sender\Exceptions\FailedSenderToLogException;
@@ -19,6 +20,11 @@ class File implements ExporterInterface
         $this->log = new Logger('arquivei_events_sender');
         $this->log->pushHandler($handler);
         $this->log->pushProcessor(function ($record) {
+            if ($record instanceof LogRecord) {
+                $record->extra['datetime'] = $record->datetime->format('c');
+                return $record;
+            }
+
             $record['datetime'] = $record['datetime']->format('c');
             return $record;
         });
